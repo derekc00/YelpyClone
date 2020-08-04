@@ -69,7 +69,7 @@ class DetailsViewController: UIViewController, UIScrollViewDelegate, MKMapViewDe
 
         }
     }
-
+    //test
     //allows views inside scroll view to respond to both scrolling and tap gestures
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         return true
