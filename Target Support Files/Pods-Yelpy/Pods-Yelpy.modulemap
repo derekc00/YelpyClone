@@ -1,0 +1,6 @@
+module Pods_Yelpy {
+  umbrella header "Pods-Yelpy-umbrella.h"
+
+  export *
+  module * { export * }
+}
