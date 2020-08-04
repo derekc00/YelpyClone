@@ -69,27 +69,6 @@ class DetailsViewController: UIViewController, UIScrollViewDelegate, MKMapViewDe
 
         }
     }
-    
-    
-    
-    override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-        
-        //Adding gradient here instead of viewdidload.
-        //actual width/height of views are gaurenteed here
-//        let gradient = CAGradientLayer()
-//
-//        gradient.frame = mainImage.bounds
-////        insert black shadow from bottom and top of main image to emphasize restaurant name and navigation commands
-//        gradient.colors = [ UIColor(white: 0.2, alpha: 0.1).cgColor , UIColor(white: 0.1, alpha: 0.05).cgColor, UIColor(white: 0.1
-//            , alpha: 0.3).cgColor ]
-//        gradient.locations = [0.0, 0.5, 0.9]
-//        mainImage.layer.insertSublayer(gradient, at: 0)
-    }
-//    override func viewWillAppear(_ animated: Bool) {
-//        super.viewWillAppear(animated)
-//        self.startSkeleton()
-//    }
 
     //allows views inside scroll view to respond to both scrolling and tap gestures
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
