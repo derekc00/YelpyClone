@@ -60,6 +60,7 @@ class DetailsViewController: UIViewController, UIScrollViewDelegate, MKMapViewDe
     var offset: CGFloat!
     var isAnimating: Bool! = false
     var mainImageGradient: CAGradientLayer!
+    var directionViewBottomBorder: CALayer!
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -77,7 +78,7 @@ class DetailsViewController: UIViewController, UIScrollViewDelegate, MKMapViewDe
         self.addTapGestures()
         
         
-        addBottomBorder(view: directionView, thickness: 1.0, margin: 24, bgColor: #colorLiteral(red: 0.9247964454, green: 0.9247964454, blue: 0.9247964454, alpha: 1))
+        addBottomBorder(view: directionView,width: directionView.bounds.width, thickness: 1.0, margin: 24, bgColor: #colorLiteral(red: 0.9247964454, green: 0.9247964454, blue: 0.9247964454, alpha: 1))
         addRightBorder(view: messagesView, thickness: 1.0, margin: 4, bgColor: #colorLiteral(red: 0.9247964454, green: 0.9247964454, blue: 0.9247964454, alpha: 1))
         API.getReviews(id: restuarant!.id) { (success) in
             
@@ -91,7 +92,11 @@ class DetailsViewController: UIViewController, UIScrollViewDelegate, MKMapViewDe
         
         //Update gradient frame to extend over the entire mainImage upon orientation change
         mainImageGradient.frame = CGRect(x: mainImage.bounds.minX, y: mainImage.bounds.minY, width: size.width, height: mainImage.bounds.height)
-
+        
+        //update bottom border of direction view. Extends and reduces with orientation change
+        directionView.layer.replaceSublayer(directionViewBottomBorder, with: CALayer())
+        addBottomBorder(view: directionView,width: size.width, thickness: 1.0, margin: 24, bgColor: #colorLiteral(red: 0.9247964454, green: 0.9247964454, blue: 0.9247964454, alpha: 1))
+        
         //remove status bar view in landscape orientation
         if UIDevice.current.orientation.isPortrait {
             self.statusBarView.isHidden = false
@@ -375,12 +380,12 @@ class DetailsViewController: UIViewController, UIScrollViewDelegate, MKMapViewDe
             
         }
     }
-    private func addBottomBorder(view: UIView, thickness: CGFloat, margin: CGFloat, bgColor: CGColor) {
-        let bottomBorder = CALayer()
-        bottomBorder.frame = CGRect(x: margin, y: view.frame.size.height - thickness, width: view.frame.size.width - 2*margin, height: thickness)
-        bottomBorder.backgroundColor = bgColor
+    private func addBottomBorder(view: UIView, width: CGFloat, thickness: CGFloat, margin: CGFloat, bgColor: CGColor) {
+        directionViewBottomBorder = CALayer()
+        directionViewBottomBorder.frame = CGRect(x: margin, y: view.frame.size.height - thickness, width: width - 2*margin, height: thickness)
+        directionViewBottomBorder.backgroundColor = bgColor
         
-        view.layer.addSublayer(bottomBorder)
+        view.layer.addSublayer(directionViewBottomBorder)
     }
     private func addRightBorder(view: UIView, thickness: CGFloat, margin: CGFloat, bgColor: CGColor) {
         let rightBorder = CALayer()
