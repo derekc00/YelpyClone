@@ -19,7 +19,7 @@ class RestaurantsViewController: UIViewController, UITableViewDelegate, UITableV
     
     let locationManager = CLLocationManager()
     
-    private var shouldAnimate = false
+    private var shouldAnimate = true
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -37,9 +37,9 @@ class RestaurantsViewController: UIViewController, UITableViewDelegate, UITableV
     }
     //must begin skeleton animation in here to avoid compile warning
     override func viewDidLayoutSubviews() {
-        if shouldAnimate {return}
+        if !shouldAnimate {return}
         
-        shouldAnimate = true
+        shouldAnimate = false
         tableView.showAnimatedGradientSkeleton()
     }
     

@@ -53,10 +53,13 @@ class DetailsViewController: UIViewController, UIScrollViewDelegate, MKMapViewDe
     
     var destination: CLLocationCoordinate2D?
     
+    
     var statusBarFrame: CGRect!
     var statusBarView: UIView!
+    
     var offset: CGFloat!
     var isAnimating: Bool! = false
+    var mainImageGradient: CAGradientLayer!
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -80,6 +83,20 @@ class DetailsViewController: UIViewController, UIScrollViewDelegate, MKMapViewDe
             
             self.initMapView()
 
+        }
+    }
+    //called every time the orientation changes
+    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        super.viewWillTransition(to: size, with: coordinator)
+        
+        //Update gradient frame to extend over the entire mainImage upon orientation change
+        mainImageGradient.frame = CGRect(x: mainImage.bounds.minX, y: mainImage.bounds.minY, width: size.width, height: mainImage.bounds.height)
+
+        //remove status bar view in landscape orientation
+        if UIDevice.current.orientation.isPortrait {
+            self.statusBarView.isHidden = false
+        } else{
+            self.statusBarView.isHidden = true
         }
     }
     override func viewWillAppear(_ animated: Bool) {
@@ -236,20 +253,20 @@ class DetailsViewController: UIViewController, UIScrollViewDelegate, MKMapViewDe
         mapView.addAnnotation(annotation)
     }
     
-    
-    
     //Fills all the labels after a segue is completed to this VC
     func fillLabels() {
         if let imageUrl = restuarant?.imageURL {
             mainImage.af.setImage(withURL: imageUrl)
-            let gradient = CAGradientLayer()
-                            
-            gradient.frame = mainImage.bounds
+            mainImageGradient = CAGradientLayer()
+            
+            
+            mainImageGradient.frame = mainImage.bounds
     //        insert black shadow from bottom and top of main image to emphasize restaurant name and navigation commands
-            gradient.colors = [ UIColor(white: 0.2, alpha: 0.1).cgColor , UIColor(white: 0.1, alpha: 0.05).cgColor, UIColor(white: 0.1
-                , alpha: 0.3).cgColor ]
-            gradient.locations = [0.0, 0.5, 0.9]
-            mainImage.layer.insertSublayer(gradient, at: 0)
+            mainImageGradient.colors = [ UIColor(white: 0.2, alpha: 0.3).cgColor , UIColor(white: 0.1, alpha: 0.05).cgColor, UIColor(white: 0.1
+                , alpha: 0.5).cgColor ]
+            mainImageGradient.locations = [0.0, 0.5, 0.9]
+            
+            mainImage.layer.insertSublayer(mainImageGradient, at: 0)
         }
         if let name = restuarant?.name {
             nameLabel.text = name
@@ -280,7 +297,6 @@ class DetailsViewController: UIViewController, UIScrollViewDelegate, MKMapViewDe
         if let phoneNumber = restuarant?.displayPhone {
             phoneLabel.text = String(phoneNumber)
             phoneLabel.font = UIFont.appLightFontWith(size: 12)
-            print(phoneLabel.text)
         }
         
     }
@@ -458,7 +474,7 @@ class DetailsViewController: UIViewController, UIScrollViewDelegate, MKMapViewDe
                 promptLabel?.transform = CGAffineTransform(translationX: 0, y: CGFloat(offset))
             }) { (success) in
                 if success{
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
                         UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseIn, animations: {
                             promptLabel?.transform = CGAffineTransform(translationX: 0, y: CGFloat(-offset))
                         }, completion: nil)
