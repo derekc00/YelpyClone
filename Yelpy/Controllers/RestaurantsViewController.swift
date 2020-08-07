@@ -98,11 +98,7 @@ class RestaurantsViewController: UIViewController, UITableViewDelegate, UITableV
             detailViewController.locationManager = locationManager
             
             
-            //format navigation bar for detail screen
-            navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
-            navigationController?.navigationBar.shadowImage = UIImage()
-            navigationController?.navigationBar.isTranslucent = true
-            CATransaction.flush()
+            
             
             //FOR FUTURE USE. Allows for customizable transparence in navigation bar
 //            navigationController?.navigationBar.isTranslucent = true

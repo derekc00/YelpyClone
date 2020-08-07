@@ -5,6 +5,8 @@
 //  Created by Derek Chang on 7/23/20.
 //  Copyright © 2020 Derek Chang. All rights reserved.
 //
+//Icons made by <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons">Smashicons</a> from <a href="https://www.flaticon.com/" title="Flaticon"> www.flaticon.com</a>
+//Icons made by <a href="https://www.flaticon.com/authors/pixel-perfect" title="Pixel perfect">Pixel perfect</a> from <a href="https://www.flaticon.com/" title="Flaticon"> www.flaticon.com</a>
 
 import UIKit
 import Alamofire
@@ -35,10 +37,14 @@ class DetailsViewController: UIViewController, UIScrollViewDelegate, MKMapViewDe
     @IBOutlet weak var mapView: MKMapView!
     @IBOutlet weak var directionView: UIView!
     @IBOutlet weak var callView: UIView!
+    @IBOutlet weak var headerView: UIView!
+    @IBOutlet weak var messagesView: UIView!
+    @IBOutlet weak var copyLinkView: UIView!
     
     @IBOutlet weak var carImage: UIImageView!
     @IBOutlet weak var phoneImage: UIImageView!
     
+    @IBOutlet weak var shareButton: UIBarButtonItem!
     @IBOutlet weak var scrollView: UIScrollView!
     
     var locationManager: CLLocationManager?
@@ -47,29 +53,118 @@ class DetailsViewController: UIViewController, UIScrollViewDelegate, MKMapViewDe
     
     var destination: CLLocationCoordinate2D?
     
+    var statusBarFrame: CGRect!
+    var statusBarView: UIView!
+    var offset: CGFloat!
+    var isAnimating: Bool! = false
     override func viewDidLoad() {
         super.viewDidLoad()
         
         mapView.delegate = self
         scrollView.delegate = self
 
-        self.initScrollView()
+        //header view begins overlapped to the naviagation bar
+        scrollView.contentInsetAdjustmentBehavior = .never
+        
+        self.setupStatusBar()
+        self.fillLabels()
         
         self.startSkeleton()
         
         self.addTapGestures()
         
-        self.fillLabels()
         
         addBottomBorder(view: directionView, thickness: 1.0, margin: 24, bgColor: #colorLiteral(red: 0.9247964454, green: 0.9247964454, blue: 0.9247964454, alpha: 1))
-        
+        addRightBorder(view: messagesView, thickness: 1.0, margin: 4, bgColor: #colorLiteral(red: 0.9247964454, green: 0.9247964454, blue: 0.9247964454, alpha: 1))
         API.getReviews(id: restuarant!.id) { (success) in
             
             self.initMapView()
 
         }
     }
-    //test
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        //format navigation bar for detail screen
+        navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
+        navigationController?.navigationBar.shadowImage = UIImage()
+        navigationController?.navigationBar.isTranslucent = true
+        self.navigationController?.navigationBar.tintColor = UIColor.white
+        
+        //show restaurant name when the nav bar is white
+        self.navigationItem.title = restuarant?.name
+        self.navigationController?.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor : UIColor.clear]
+
+        
+        CATransaction.flush()
+    }
+    //reset navigation bar to clear upon leaving the VC
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        print("a")
+        navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
+        navigationController?.navigationBar.shadowImage = UIImage()
+        navigationController?.navigationBar.isTranslucent = true
+        self.navigationController?.navigationBar.tintColor = UIColor.clear
+        self.navigationController?.navigationBar.backgroundColor = UIColor.clear
+        self.navigationController?.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.clear]
+    }
+    
+    private func setupStatusBar(){
+        //get height of status bar
+        if #available(iOS 13.0, *) {
+            statusBarFrame = UIApplication.shared.windows[0].windowScene?.statusBarManager?.statusBarFrame ?? CGRect.zero
+        } else {
+            // Fallback on earlier versions
+            statusBarFrame = UIApplication.shared.statusBarFrame
+        }
+        
+        //set status bar with white text
+        self.navigationController?.navigationBar.barStyle = UIBarStyle.black
+
+        //add a view on top of the status bar
+        statusBarView = UIView(frame: statusBarFrame)
+        statusBarView.isOpaque = false
+        statusBarView.backgroundColor = .clear
+        view.addSubview(statusBarView)
+    }
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        
+        //Mark the end of the offset
+        guard let navBarHeight = self.navigationController?.navigationBar.bounds.height else{return}
+        let targetHeight = headerView.bounds.height - navBarHeight - statusBarFrame.height
+        
+        //calculate how much has been scrolled relative to the targetHeight
+        offset = scrollView.contentOffset.y / targetHeight
+                
+        //cap offset to 1 to conform to UIColor alpha parameter
+        if offset > 1 {offset = 1}
+        
+        if offset > 0.5 {
+            self.navigationController?.navigationBar.barStyle = UIBarStyle.default
+        } else {
+            self.navigationController?.navigationBar.barStyle = UIBarStyle.black
+        }
+        
+        //the restuarant title fades in when the offset is at 80%
+        if offset > 0.8 {
+            //map black color's alpha to the remaining 20% to 0.0-1.0
+            let clearToBlack = UIColor(red: 0, green: 0, blue: 0, alpha: (offset - 0.8)*5)
+            print(clearToBlack)
+            self.navigationController?.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor: clearToBlack]
+        } else{
+            self.navigationController?.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.clear]
+        }
+        
+        let clearToWhite = UIColor(red: 1, green: 1, blue: 1, alpha: offset)
+        let whiteToBlack = UIColor(hue: 1, saturation: 0, brightness: 1-offset, alpha: 1 )
+        self.navigationController?.navigationBar.tintColor = whiteToBlack
+        self.navigationController?.navigationBar.backItem?.backBarButtonItem?.tintColor = whiteToBlack
+        
+        //change and sync navigation controller and status bar bg color
+        self.navigationController?.navigationBar.backgroundColor = clearToWhite
+        statusBarView!.backgroundColor = clearToWhite
+        
+    }
     //allows views inside scroll view to respond to both scrolling and tap gestures
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         return true
@@ -110,9 +205,6 @@ class DetailsViewController: UIViewController, UIScrollViewDelegate, MKMapViewDe
                 self.distanceLabel.text = String(round(route.distance * 10 * 0.000621371) / 10) + " mi"
                 self.expectedTravelLabel.text = String(Int(round(route.expectedTravelTime / 60)) + 1) + " min drive"
             }
-            
-            
-            
         }
     }
     func startSkeleton(){
@@ -147,7 +239,7 @@ class DetailsViewController: UIViewController, UIScrollViewDelegate, MKMapViewDe
     
     
     //Fills all the labels after a segue is completed to this VC
-    private func fillLabels() {
+    func fillLabels() {
         if let imageUrl = restuarant?.imageURL {
             mainImage.af.setImage(withURL: imageUrl)
             let gradient = CAGradientLayer()
@@ -183,9 +275,12 @@ class DetailsViewController: UIViewController, UIScrollViewDelegate, MKMapViewDe
         
         if let address = restuarant?.address {
             addressLabel.text = address
+            addressLabel.font = UIFont.appLightFontWith(size: 12)
         }
         if let phoneNumber = restuarant?.displayPhone {
-            phoneLabel.text = phoneNumber
+            phoneLabel.text = String(phoneNumber)
+            phoneLabel.font = UIFont.appLightFontWith(size: 12)
+            print(phoneLabel.text)
         }
         
     }
@@ -193,13 +288,13 @@ class DetailsViewController: UIViewController, UIScrollViewDelegate, MKMapViewDe
     //uses the restaurant's phone number to prompt a call
     @objc func call(gesture: UITapGestureRecognizer){
         
-        
         //change bgColor and send vibration
         if gesture.state == .began {
             callView.backgroundColor = #colorLiteral(red: 0.9247964454, green: 0.9247964454, blue: 0.9247964454, alpha: 1)
             UIImpactFeedbackGenerator(style: .medium).impactOccurred()
             return
         }
+        
         //Upon release, reset bg color & present call prompt
         if gesture.state == .ended {
             callView.backgroundColor = UIColor.clear
@@ -235,12 +330,48 @@ class DetailsViewController: UIViewController, UIScrollViewDelegate, MKMapViewDe
         }
     }
     
+    @objc func message(gesture: UITapGestureRecognizer){
+        print("a")
+        //change bgColor and send vibration
+        if gesture.state == .began {
+            messagesView.backgroundColor = #colorLiteral(red: 0.9247964454, green: 0.9247964454, blue: 0.9247964454, alpha: 1)
+            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+            return
+        }
+        
+        //Upon release, reset bg color & present call prompt
+        if gesture.state == .ended {
+            messagesView.backgroundColor = UIColor.clear
+            
+            //No action if gesture moved off view
+            let touchLocation = gesture.location(in: gesture.view)
+            if !messagesView.bounds.contains(touchLocation){
+                print("Gesture moved off callView")
+                return
+            }
+            
+            let messageVC = MFMessageComposeViewController()
+                
+            messageVC.body = restuarant?.url?.absoluteString
+            messageVC.messageComposeDelegate = self
+                
+            self.present(messageVC, animated: true, completion: nil)
+            
+        }
+    }
     private func addBottomBorder(view: UIView, thickness: CGFloat, margin: CGFloat, bgColor: CGColor) {
         let bottomBorder = CALayer()
         bottomBorder.frame = CGRect(x: margin, y: view.frame.size.height - thickness, width: view.frame.size.width - 2*margin, height: thickness)
         bottomBorder.backgroundColor = bgColor
         
         view.layer.addSublayer(bottomBorder)
+    }
+    private func addRightBorder(view: UIView, thickness: CGFloat, margin: CGFloat, bgColor: CGColor) {
+        let rightBorder = CALayer()
+        rightBorder.frame = CGRect(x: view.frame.size.width - thickness, y: margin, width: thickness, height: view.frame.size.height - 2*margin)
+        rightBorder.backgroundColor = bgColor
+        
+        view.layer.addSublayer(rightBorder)
     }
     
     @objc func getDirections(gesture : UITapGestureRecognizer){
@@ -279,12 +410,7 @@ class DetailsViewController: UIViewController, UIScrollViewDelegate, MKMapViewDe
     
     //handles share with Text button
     @IBAction func shareWithText(_ sender: Any) {
-        let messageVC = MFMessageComposeViewController()
-            
-        messageVC.body = restuarant?.url?.absoluteString
-        messageVC.messageComposeDelegate = self
-            
-        self.present(messageVC, animated: true, completion: nil)
+        
     }
     func messageComposeViewController(_ controller: MFMessageComposeViewController, didFinishWith result: MessageComposeResult) {
         switch result {
@@ -313,24 +439,26 @@ class DetailsViewController: UIViewController, UIScrollViewDelegate, MKMapViewDe
             present(shareVC, animated: true, completion: nil)
         }
     }
-    
-    private func initScrollView(){
-        scrollView.translatesAutoresizingMaskIntoConstraints = false
-        scrollView.contentInsetAdjustmentBehavior = .never
-    }
     private func addTapGestures(){
         //add action to call button
         let tapCallButton = UILongPressGestureRecognizer(target: self, action: #selector(call))
-        tapCallButton.minimumPressDuration = 0.05
-        
+        tapCallButton.minimumPressDuration = 0.1
+        tapCallButton.delegate = self
+        tapCallButton.cancelsTouchesInView = false
         callView.addGestureRecognizer(tapCallButton)
         
         
         let tapMapButton = UILongPressGestureRecognizer(target: self, action: #selector(getDirections))
-        tapMapButton.minimumPressDuration = 0.05
+        tapMapButton.minimumPressDuration = 0.1
         tapMapButton.delegate = self
         tapMapButton.cancelsTouchesInView = false
         directionView.addGestureRecognizer(tapMapButton)
+        
+        let tapMessages = UILongPressGestureRecognizer(target: self, action: #selector(message))
+        tapMessages.minimumPressDuration = 0.1
+        tapMessages.delegate = self
+        tapMessages.cancelsTouchesInView = false
+        messagesView.addGestureRecognizer(tapMessages)
     }
-}
 
+}
