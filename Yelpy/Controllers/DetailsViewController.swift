@@ -407,10 +407,69 @@ class DetailsViewController: UIViewController, UIScrollViewDelegate, MKMapViewDe
     }
     
     
-    
-    //handles share with Text button
-    @IBAction func shareWithText(_ sender: Any) {
-        
+    @objc func copyLink(gesture: UITapGestureRecognizer){
+        //change bgColor and send vibration
+        if gesture.state == .began {
+            copyLinkView.backgroundColor = #colorLiteral(red: 0.9247964454, green: 0.9247964454, blue: 0.9247964454, alpha: 1)
+            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+            return
+        }
+        if gesture.state == .cancelled || gesture.state == .failed{
+            copyLinkView.backgroundColor = UIColor.clear
+            return
+        }
+        //Upon release, reset bg color & open Maps with directions to restaurant
+        if gesture.state == .ended {
+            copyLinkView.backgroundColor = UIColor.clear
+
+            //No action if gesture moved off view
+            let touchLocation = gesture.location(in: gesture.view)
+            if !copyLinkView.bounds.contains(touchLocation){
+                print("Gesture moved off copyLinkView")
+                return
+            }
+            
+            //copy url to device clipboard
+            let pasteboard = UIPasteboard.general
+            pasteboard.string = restuarant?.url?.absoluteString
+            
+            //create and animate a label that alerts that the link was copied
+            let margin = 40
+            let offset = 70
+            var promptLabel : UILabel?
+            promptLabel = UILabel(frame: CGRect(x: 0, y: -70, width: Int(self.view.bounds.width) - 2*margin, height: 70))
+            promptLabel?.backgroundColor = .white
+            promptLabel?.textAlignment = .center
+            promptLabel?.font = UIFont(name: "Halvetica", size: 18.0)
+            promptLabel?.numberOfLines = 0
+            promptLabel?.text = "Link Copied"
+            promptLabel?.lineBreakMode = .byTruncatingTail
+            promptLabel?.center.x = self.view.center.x
+            
+            let shadowSize: CGFloat = 8
+            let width = promptLabel?.bounds.width
+            let height = promptLabel?.bounds.height
+            let contactRect = CGRect(x: 0, y: height! - (shadowSize * 0.4), width: width!, height: shadowSize)
+            promptLabel?.layer.shadowPath = UIBezierPath(rect: contactRect).cgPath
+            promptLabel?.layer.shadowRadius = 5
+            promptLabel?.layer.shadowOpacity = 0.2
+            self.navigationController?.navigationBar.addSubview(promptLabel!)
+            UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseOut, animations: {
+                promptLabel?.transform = CGAffineTransform(translationX: 0, y: CGFloat(offset))
+            }) { (success) in
+                if success{
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                        UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseIn, animations: {
+                            promptLabel?.transform = CGAffineTransform(translationX: 0, y: CGFloat(-offset))
+                        }, completion: nil)
+                    }
+                    
+                }
+            }
+            
+            
+            
+        }
     }
     func messageComposeViewController(_ controller: MFMessageComposeViewController, didFinishWith result: MessageComposeResult) {
         switch result {
@@ -440,25 +499,32 @@ class DetailsViewController: UIViewController, UIScrollViewDelegate, MKMapViewDe
         }
     }
     private func addTapGestures(){
+        
+        let minPressDuration = 0.1
         //add action to call button
         let tapCallButton = UILongPressGestureRecognizer(target: self, action: #selector(call))
-        tapCallButton.minimumPressDuration = 0.1
+        tapCallButton.minimumPressDuration = minPressDuration
         tapCallButton.delegate = self
         tapCallButton.cancelsTouchesInView = false
         callView.addGestureRecognizer(tapCallButton)
         
         
         let tapMapButton = UILongPressGestureRecognizer(target: self, action: #selector(getDirections))
-        tapMapButton.minimumPressDuration = 0.1
+        tapMapButton.minimumPressDuration = minPressDuration
         tapMapButton.delegate = self
         tapMapButton.cancelsTouchesInView = false
         directionView.addGestureRecognizer(tapMapButton)
         
         let tapMessages = UILongPressGestureRecognizer(target: self, action: #selector(message))
-        tapMessages.minimumPressDuration = 0.1
+        tapMessages.minimumPressDuration = minPressDuration
         tapMessages.delegate = self
         tapMessages.cancelsTouchesInView = false
         messagesView.addGestureRecognizer(tapMessages)
+        
+        let tapCopyLink = UILongPressGestureRecognizer(target: self, action: #selector(copyLink))
+        tapCopyLink.minimumPressDuration = minPressDuration
+        tapCopyLink.cancelsTouchesInView = false
+        copyLinkView.addGestureRecognizer(tapCopyLink)
     }
 
 }
