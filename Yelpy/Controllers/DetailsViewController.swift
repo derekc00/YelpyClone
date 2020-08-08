@@ -310,6 +310,12 @@ class DetailsViewController: UIViewController, UIScrollViewDelegate, MKMapViewDe
     //uses the restaurant's phone number to prompt a call
     @objc func call(gesture: UITapGestureRecognizer){
         
+        if gesture.state == .cancelled || gesture.state == .failed || scrollView.isDragging{
+            gesture.state = .failed
+            callView.backgroundColor = UIColor.clear
+            return
+        }
+        
         //change bgColor and send vibration
         if gesture.state == .began {
             callView.backgroundColor = #colorLiteral(red: 0.9247964454, green: 0.9247964454, blue: 0.9247964454, alpha: 1)
@@ -353,7 +359,13 @@ class DetailsViewController: UIViewController, UIScrollViewDelegate, MKMapViewDe
     }
     
     @objc func message(gesture: UITapGestureRecognizer){
-        print("a")
+        
+        if gesture.state == .cancelled || gesture.state == .failed || scrollView.isDragging{
+            gesture.state = .failed
+            messagesView.backgroundColor = UIColor.clear
+            return
+        }
+        
         //change bgColor and send vibration
         if gesture.state == .began {
             messagesView.backgroundColor = #colorLiteral(red: 0.9247964454, green: 0.9247964454, blue: 0.9247964454, alpha: 1)
@@ -398,17 +410,19 @@ class DetailsViewController: UIViewController, UIScrollViewDelegate, MKMapViewDe
     
     @objc func getDirections(gesture : UITapGestureRecognizer){
         
-        
+        if gesture.state == .cancelled || gesture.state == .failed || scrollView.isDragging{
+            
+            gesture.state = .failed
+            directionView.backgroundColor = UIColor.clear
+            return
+        }
         //change bgColor and send vibration
         if gesture.state == .began {
             directionView.backgroundColor = #colorLiteral(red: 0.9247964454, green: 0.9247964454, blue: 0.9247964454, alpha: 1)
             UIImpactFeedbackGenerator(style: .medium).impactOccurred()
             return
         }
-        if gesture.state == .cancelled || gesture.state == .failed{
-            directionView.backgroundColor = UIColor.clear
-            return
-        }
+        
         //Upon release, reset bg color & open Maps with directions to restaurant
         if gesture.state == .ended {
             directionView.backgroundColor = UIColor.clear
@@ -430,16 +444,19 @@ class DetailsViewController: UIViewController, UIScrollViewDelegate, MKMapViewDe
     
     
     @objc func copyLink(gesture: UITapGestureRecognizer){
+        
+        if gesture.state == .cancelled || gesture.state == .failed || scrollView.isDragging{
+            gesture.state = .failed
+            copyLinkView.backgroundColor = UIColor.clear
+            return
+        }
         //change bgColor and send vibration
         if gesture.state == .began {
             copyLinkView.backgroundColor = #colorLiteral(red: 0.9247964454, green: 0.9247964454, blue: 0.9247964454, alpha: 1)
             UIImpactFeedbackGenerator(style: .medium).impactOccurred()
             return
         }
-        if gesture.state == .cancelled || gesture.state == .failed{
-            copyLinkView.backgroundColor = UIColor.clear
-            return
-        }
+        
         //Upon release, reset bg color & open Maps with directions to restaurant
         if gesture.state == .ended {
             copyLinkView.backgroundColor = UIColor.clear
@@ -522,7 +539,7 @@ class DetailsViewController: UIViewController, UIScrollViewDelegate, MKMapViewDe
     }
     private func addTapGestures(){
         
-        let minPressDuration = 0.1
+        let minPressDuration = 0.2
         //add action to call button
         let tapCallButton = UILongPressGestureRecognizer(target: self, action: #selector(call))
         tapCallButton.minimumPressDuration = minPressDuration
