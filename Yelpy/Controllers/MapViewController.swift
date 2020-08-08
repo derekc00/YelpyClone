@@ -21,7 +21,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         
         
         // Do any additional setup after loading the view.
-        locationManager = LocationManager.sharedInstance.manager
+        mapView.showsUserLocation = true
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -31,15 +31,22 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     }
     // --------------------Map View Functions-------------------------------------------------------------------
     private func initMapView() {
-        mapView.showsUserLocation = true
         
-//        let currentLocation: CLLocationCoordinate2D = (locationManager?.location!.coordinate)!
+        
+        
 //        self.destination = CLLocationCoordinate2D(latitude: (restuarant?.coordinates["latitude"])!, longitude: (restuarant?.coordinates["longitude"])!)
 //
 //        addPin(title: "", latitude: self.destination!.latitude, longitude: self.destination!.longitude)
 //
 //        displayRoutes(source: currentLocation, destination: self.destination!)
         
+    }
+    
+    //once the map is loaded, the user location will be available through the mapView instance
+    func mapView(_ mapView: MKMapView, didUpdate userLocation: MKUserLocation) {
+        let region = MKCoordinateRegion(center: userLocation.coordinate, span: MKCoordinateSpan(latitudeDelta: 0.1, longitudeDelta: 0.1))
+        print(userLocation.coordinate)
+        mapView.setRegion(region, animated: false)
     }
     //customize directions overlay (ie blue line that shows direction)
     func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
