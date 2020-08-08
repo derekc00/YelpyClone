@@ -11,24 +11,32 @@ import UIKit
 import CoreLocation
 import SkeletonView
  
-class RestaurantsViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, CLLocationManagerDelegate {
+class RestaurantsViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, CLLocationManagerDelegate, UISearchBarDelegate {
 
     @IBOutlet weak var tableView: UITableView!
-
+    @IBOutlet weak var searchBar: UISearchBar!
+    
+    
     var restaurantsArray: [Restaurant] = []
     
     let locationManager = CLLocationManager()
     
     private var shouldAnimate = true
-    
+    private var searchRestaurants = [Restaurant]()
+    var searching: Bool = false
     override func viewDidLoad() {
         super.viewDidLoad()
         
         tableView.delegate = self
         tableView.dataSource = self
+        searchBar.delegate = self
         
         tableView.rowHeight = UITableView.automaticDimension
         tableView.estimatedRowHeight = 330
+        
+        
+        
+        searchBar.backgroundImage = UIImage()
         
         locationManager.delegate = self
 
@@ -37,10 +45,16 @@ class RestaurantsViewController: UIViewController, UITableViewDelegate, UITableV
     }
     //must begin skeleton animation in here to avoid compile warning
     override func viewDidLayoutSubviews() {
-        if !shouldAnimate {return}
         
+        if !shouldAnimate {return}
         shouldAnimate = false
         tableView.showAnimatedGradientSkeleton()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        self.navigationController?.navigationBar.isHidden = true
+        self.navigationController?.navigationBar.barStyle = UIBarStyle.default
+        
     }
     
     //Get data from API helper and retrieve restaurants
@@ -63,13 +77,23 @@ class RestaurantsViewController: UIViewController, UITableViewDelegate, UITableV
     }
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        if searching {
+            return self.searchRestaurants.count
+        }
         return  self.restaurantsArray.count
+
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "RestaurantCell", for: indexPath) as! RestaurantCell
         
-        let restaurant = restaurantsArray[indexPath.row]
+        var restaurant: Restaurant!
+        if searching {
+            restaurant = searchRestaurants[indexPath.row]
+        } else{
+            restaurant = restaurantsArray[indexPath.row]
+        }
+        
         
         if self.shouldAnimate {
             cell.showAnimatedGradientSkeleton()
@@ -92,25 +116,18 @@ class RestaurantsViewController: UIViewController, UITableViewDelegate, UITableV
         }
         
         if segue.identifier == "detailSegue"{
-            let restaurant = restaurantsArray[indexPath.row]
+            var restaurant: Restaurant!
+            if searching{ restaurant = searchRestaurants[indexPath.row]}
+            else {restaurant = restaurantsArray[indexPath.row]}
+            
             let detailViewController = segue.destination as! DetailsViewController
             detailViewController.restuarant = restaurant
             detailViewController.locationManager = locationManager
-            
-            
-            
-            
-            //FOR FUTURE USE. Allows for customizable transparence in navigation bar
-//            navigationController?.navigationBar.isTranslucent = true
-//            navigationController?.navigationBar.subviews.first?.alpha = 0.3
-//            CATransaction.flush()
         }
         
         self.tableView.deselectRow(at: indexPath, animated: false)
     }
     
-    
-
     //Uses CLLocationManager to ask the user for their location
     //If they decline, return hardcoded san francisco coordinates
     func getCurrentLocation(locationManager: CLLocationManager)-> ( lat: Double, long:Double) {
@@ -150,6 +167,19 @@ class RestaurantsViewController: UIViewController, UITableViewDelegate, UITableV
                 getAPIData()
         }
     }
+    
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        searchRestaurants = restaurantsArray.filter({$0.name.lowercased().contains(searchText.lowercased())})
+        print(searchRestaurants.count)
+        searching = true
+        tableView.reloadData()
+    }
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        searching = false
+        searchBar.endEditing(true)
+        searchBar.text = ""
+        tableView.reloadData()
+    }
 }
 extension RestaurantsViewController: SkeletonTableViewDataSource {
     func collectionSkeletonView(_ skeletonView: UITableView, cellIdentifierForRowAt indexPath: IndexPath) -> ReusableCellIdentifier {
@@ -160,4 +190,5 @@ extension RestaurantsViewController: SkeletonTableViewDataSource {
         return 20
     }
 }
+
 

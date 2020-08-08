@@ -112,6 +112,7 @@ class DetailsViewController: UIViewController, UIScrollViewDelegate, MKMapViewDe
         navigationController?.navigationBar.isTranslucent = true
         self.navigationController?.navigationBar.tintColor = UIColor.white
         
+        navigationController?.navigationBar.isHidden = false
         //show restaurant name when the nav bar is white
         self.navigationItem.title = restuarant?.name
         self.navigationController?.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor : UIColor.clear]
