@@ -80,13 +80,14 @@ class DetailsViewController: UIViewController, UIScrollViewDelegate, MKMapViewDe
         
         addBottomBorder(view: directionView,width: directionView.bounds.width, thickness: 1.0, margin: 24, bgColor: #colorLiteral(red: 0.9247964454, green: 0.9247964454, blue: 0.9247964454, alpha: 1))
         addRightBorder(view: messagesView, thickness: 1.0, margin: 4, bgColor: #colorLiteral(red: 0.9247964454, green: 0.9247964454, blue: 0.9247964454, alpha: 1))
+        
         API.getReviews(id: restuarant!.id) { (success) in
             
             self.initMapView()
 
         }
     }
-    //called every time the orientation changes
+    //called every time the orientation changes. Adjusts the gradient and border dimensions.
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
         
@@ -175,7 +176,8 @@ class DetailsViewController: UIViewController, UIScrollViewDelegate, MKMapViewDe
         if offset > 0.8 {
             //map black color's alpha to the remaining 20% to 0.0-1.0
             let clearToBlack = UIColor(red: 0, green: 0, blue: 0, alpha: (offset - 0.8)*5)
-            print(clearToBlack)
+            //nav bar title fades in from bottom of the bar synced with the changing background color
+            self.navigationController?.navigationBar.setTitleVerticalPositionAdjustment((1 - offset)*5 * 8, for: UIBarMetrics.default)
             self.navigationController?.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor: clearToBlack]
         } else{
             self.navigationController?.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.clear]
@@ -216,17 +218,19 @@ class DetailsViewController: UIViewController, UIScrollViewDelegate, MKMapViewDe
         }
         if let reviewCount = restuarant?.reviews {
             reviewCountLabel.text = String(reviewCount)
-            reviewCountLabel.font = UIFont.appLightFontWith(size: 12)
+            reviewCountLabel.font = UIFont.appRegularFontWith(size: 12)
         }
         if let isClosed = restuarant?.isClosed {
             if isClosed == 0 {
                 isClosedLabel.text = "Open"
-                isClosedLabel.textColor = UIColor(red: 11/255, green: 102/255, blue: 35/255, alpha: 1.0)
+                openView.backgroundColor = #colorLiteral(red: 0.5044113994, green: 0.7961511612, blue: 0.4454799891, alpha: 1)
             } else{
-                isClosedLabel.text = "Closed now"
-                isClosedLabel.textColor = UIColor(red: 210/255, green: 31/255, blue: 60/255, alpha: 1.0)
+                isClosedLabel.text = "Closed"
+                openView.backgroundColor = #colorLiteral(red: 0.8913473887, green: 0.279915911, blue: 0.2901064356, alpha: 1)
             }
+            openView.layer.cornerRadius = 4
             isClosedLabel.font = UIFont.appBoldFontWith(size: 14)
+            isClosedLabel.textColor = .white
         }
         
         if let address = restuarant?.address {
@@ -263,31 +267,7 @@ class DetailsViewController: UIViewController, UIScrollViewDelegate, MKMapViewDe
         }
     }
 
-    //Requests directions and adds its to mapview
-    func displayRoutes(source: CLLocationCoordinate2D, destination: CLLocationCoordinate2D){
-        
-        let request = MKDirections.Request()
-        request.source = MKMapItem(placemark: MKPlacemark(coordinate: source))
-        request.destination = MKMapItem(placemark: MKPlacemark(coordinate: destination))
-        request.transportType = .automobile
-        
-        let directions = MKDirections(request: request)
-        
-        directions.calculate { ( response, error) in
-            guard let unwrappedResponse = response else {return}
-            
-            //MUST STOP SKELETON BEFORE FILLING LABELS/IMAGES
-            self.stopSkeleton()
-            
-            for route in unwrappedResponse.routes {
-                self.mapView.addOverlay(route.polyline)
-                self.mapView.setVisibleMapRect(route.polyline.boundingMapRect, edgePadding: UIEdgeInsets(top: 50, left: 50, bottom: 50, right: 50), animated: false)
-                
-                self.distanceLabel.text = String(round(route.distance * 10 * 0.000621371) / 10) + " mi"
-                self.expectedTravelLabel.text = String(Int(round(route.expectedTravelTime / 60)) + 1) + " min drive"
-            }
-        }
-    }
+    
     
     // --------------------Map View Functions-------------------------------------------------------------------
     private func initMapView() {
@@ -315,6 +295,32 @@ class DetailsViewController: UIViewController, UIScrollViewDelegate, MKMapViewDe
         annotation.coordinate = locationCoordinate
         annotation.title = title
         mapView.addAnnotation(annotation)
+    }
+    
+    //Requests directions and adds its to mapview
+    func displayRoutes(source: CLLocationCoordinate2D, destination: CLLocationCoordinate2D){
+        
+        let request = MKDirections.Request()
+        request.source = MKMapItem(placemark: MKPlacemark(coordinate: source))
+        request.destination = MKMapItem(placemark: MKPlacemark(coordinate: destination))
+        request.transportType = .automobile
+        
+        let directions = MKDirections(request: request)
+        
+        directions.calculate { ( response, error) in
+            guard let unwrappedResponse = response else {return}
+            
+            //MUST STOP SKELETON BEFORE FILLING LABELS/IMAGES
+            self.stopSkeleton()
+            
+            for route in unwrappedResponse.routes {
+                self.mapView.addOverlay(route.polyline)
+                self.mapView.setVisibleMapRect(route.polyline.boundingMapRect, edgePadding: UIEdgeInsets(top: 50, left: 50, bottom: 50, right: 50), animated: false)
+                
+                self.distanceLabel.text = String(round(route.distance * 10 * 0.000621371) / 10) + " mi"
+                self.expectedTravelLabel.text = String(Int(round(route.expectedTravelTime / 60)) + 1) + " min drive"
+            }
+        }
     }
     
     // --------------------Tap Gesture functions and its helper functions-------------------------------------------------------------------

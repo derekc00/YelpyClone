@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="16097" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" launchScreen="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="01J-lp-oVM">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="16097.2" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" launchScreen="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="01J-lp-oVM">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="16087"/>
@@ -21,9 +21,15 @@
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="powered_by_yelp" translatesAutoresizingMaskIntoConstraints="NO" id="F3k-l4-4eP">
+                                <rect key="frame" x="0.0" y="798" width="414" height="64"/>
+                            </imageView>
                         </subviews>
                         <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
                         <constraints>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="F3k-l4-4eP" secondAttribute="trailing" id="11l-K7-A2J"/>
+                            <constraint firstItem="F3k-l4-4eP" firstAttribute="bottom" secondItem="6Tk-OE-BBY" secondAttribute="bottom" id="6iv-fM-vvt"/>
+                            <constraint firstItem="F3k-l4-4eP" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="MJa-wL-Vuj"/>
                             <constraint firstItem="hR4-rF-LLq" firstAttribute="centerX" secondItem="6Tk-OE-BBY" secondAttribute="centerX" id="RlE-Em-L9f"/>
                             <constraint firstItem="hR4-rF-LLq" firstAttribute="centerY" secondItem="6Tk-OE-BBY" secondAttribute="centerY" id="bpe-sJ-vhZ"/>
                         </constraints>
@@ -32,7 +38,10 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="iYj-Kq-Ea1" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="53" y="375"/>
+            <point key="canvasLocation" x="52.173913043478265" y="375"/>
         </scene>
     </scenes>
+    <resources>
+        <image name="powered_by_yelp" width="512" height="64"/>
+    </resources>
 </document>

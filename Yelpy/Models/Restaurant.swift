@@ -9,6 +9,8 @@
 import Foundation
 import UIKit
 
+
+
 class Restaurant {
     var imageURL: URL?
     var url: URL?

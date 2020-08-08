@@ -43,13 +43,6 @@ class RestaurantCell: UITableViewCell {
             address.text = r.shortAddress
             address.font = UIFont.appLightFontWith(size: 12)
             
-//            if r.isClosed == 1{
-//                isClosed.text = "Closed now"
-//            } else{
-//                isClosed.text = "Open now"
-//            }
-            
-            
             //set images
             ratingImage.image = r.stars
             

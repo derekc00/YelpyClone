@@ -17,13 +17,15 @@ class RestaurantsViewController: UIViewController, UITableViewDelegate, UITableV
     @IBOutlet weak var searchBar: UISearchBar!
     
     
-    var restaurantsArray: [Restaurant] = []
+//    var restaurantsArray: [Restaurant] = []
     
     let locationManager = CLLocationManager()
     
     private var shouldAnimate = true
     private var searchRestaurants = [Restaurant]()
     var searching: Bool = false
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -67,7 +69,7 @@ class RestaurantsViewController: UIViewController, UITableViewDelegate, UITableV
                 self.getAPIData() //call API again if failed to return restaurants
                 return
             }
-            self.restaurantsArray = restaurants
+            Restaurants.sharedInstance.array = restaurants
             self.shouldAnimate = false
             self.tableView.hideSkeleton()
             self.tableView.reloadData()
@@ -80,7 +82,7 @@ class RestaurantsViewController: UIViewController, UITableViewDelegate, UITableV
         if searching {
             return self.searchRestaurants.count
         }
-        return  self.restaurantsArray.count
+        return  Restaurants.sharedInstance.array.count
 
     }
     
@@ -91,7 +93,7 @@ class RestaurantsViewController: UIViewController, UITableViewDelegate, UITableV
         if searching {
             restaurant = searchRestaurants[indexPath.row]
         } else{
-            restaurant = restaurantsArray[indexPath.row]
+            restaurant = Restaurants.sharedInstance.array[indexPath.row]
         }
         
         
@@ -118,7 +120,7 @@ class RestaurantsViewController: UIViewController, UITableViewDelegate, UITableV
         if segue.identifier == "detailSegue"{
             var restaurant: Restaurant!
             if searching{ restaurant = searchRestaurants[indexPath.row]}
-            else {restaurant = restaurantsArray[indexPath.row]}
+            else {restaurant = Restaurants.sharedInstance.array[indexPath.row]}
             
             let detailViewController = segue.destination as! DetailsViewController
             detailViewController.restuarant = restaurant
@@ -135,6 +137,7 @@ class RestaurantsViewController: UIViewController, UITableViewDelegate, UITableV
         locationManager.startUpdatingLocation()
         locationManager.pausesLocationUpdatesAutomatically = false
         
+        LocationManager.sharedInstance.manager = locationManager
         switch CLLocationManager.authorizationStatus() {
         case .authorizedWhenInUse:
             if let currentLocation = locationManager.location {
@@ -169,9 +172,11 @@ class RestaurantsViewController: UIViewController, UITableViewDelegate, UITableV
     }
     
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        searchRestaurants = restaurantsArray.filter({$0.name.lowercased().contains(searchText.lowercased())})
+        searchRestaurants = Restaurants.sharedInstance.array.filter({$0.name.lowercased().contains(searchText.lowercased())})
         print(searchRestaurants.count)
         searching = true
+        
+//        performSegue(withIdentifier: "searchSegue", sender: self)
         tableView.reloadData()
     }
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
