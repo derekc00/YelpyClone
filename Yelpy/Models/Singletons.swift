@@ -15,8 +15,3 @@ class Restaurants {
     static let sharedInstance = Restaurants()
     var array = [Restaurant]()
 }
-
-class LocationManager{
-    static let sharedInstance = LocationManager()
-    var manager: CLLocationManager?
-}

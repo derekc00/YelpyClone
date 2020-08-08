@@ -36,8 +36,6 @@ class RestaurantsViewController: UIViewController, UITableViewDelegate, UITableV
         tableView.rowHeight = UITableView.automaticDimension
         tableView.estimatedRowHeight = 330
         
-        
-        
         searchBar.backgroundImage = UIImage()
         
         locationManager.delegate = self
@@ -137,7 +135,6 @@ class RestaurantsViewController: UIViewController, UITableViewDelegate, UITableV
         locationManager.startUpdatingLocation()
         locationManager.pausesLocationUpdatesAutomatically = false
         
-        LocationManager.sharedInstance.manager = locationManager
         switch CLLocationManager.authorizationStatus() {
         case .authorizedWhenInUse:
             if let currentLocation = locationManager.location {
@@ -176,7 +173,6 @@ class RestaurantsViewController: UIViewController, UITableViewDelegate, UITableV
         print(searchRestaurants.count)
         searching = true
         
-//        performSegue(withIdentifier: "searchSegue", sender: self)
         tableView.reloadData()
     }
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
