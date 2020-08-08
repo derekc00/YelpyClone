@@ -132,6 +132,7 @@ class DetailsViewController: UIViewController, UIScrollViewDelegate, MKMapViewDe
         self.navigationController?.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.clear]
     }
     
+    //Configure status bar to be in sync with the navigation bar
     private func setupStatusBar(){
         //get height of status bar
         if #available(iOS 13.0, *) {
@@ -150,6 +151,8 @@ class DetailsViewController: UIViewController, UIScrollViewDelegate, MKMapViewDe
         statusBarView.backgroundColor = .clear
         view.addSubview(statusBarView)
     }
+    
+    //dynamically change the navigation bar as the scrollview is scrolling
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         
         //Mark the end of the offset
@@ -187,76 +190,6 @@ class DetailsViewController: UIViewController, UIScrollViewDelegate, MKMapViewDe
         self.navigationController?.navigationBar.backgroundColor = clearToWhite
         statusBarView!.backgroundColor = clearToWhite
         
-    }
-    //allows views inside scroll view to respond to both scrolling and tap gestures
-    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
-        return true
-    }
-    
-    private func initMapView() {
-        mapView.showsUserLocation = true
-        
-        let currentLocation: CLLocationCoordinate2D = (locationManager?.location!.coordinate)!
-        self.destination = CLLocationCoordinate2D(latitude: (restuarant?.coordinates["latitude"])!, longitude: (restuarant?.coordinates["longitude"])!)
-        
-        addPin(title: "", latitude: self.destination!.latitude, longitude: self.destination!.longitude)
-        
-        displayRoutes(source: currentLocation, destination: self.destination!)
-        
-    }
-
-    //Requests directions and adds its to mapview
-    func displayRoutes(source: CLLocationCoordinate2D, destination: CLLocationCoordinate2D){
-        
-        let request = MKDirections.Request()
-        request.source = MKMapItem(placemark: MKPlacemark(coordinate: source))
-        request.destination = MKMapItem(placemark: MKPlacemark(coordinate: destination))
-        request.transportType = .automobile
-        
-        let directions = MKDirections(request: request)
-        
-        directions.calculate { ( response, error) in
-            guard let unwrappedResponse = response else {return}
-            
-            //MUST STOP SKELETON BEFORE FILLING LABELS/IMAGES
-            self.stopSkeleton()
-            
-            for route in unwrappedResponse.routes {
-                self.mapView.addOverlay(route.polyline)
-                self.mapView.setVisibleMapRect(route.polyline.boundingMapRect, edgePadding: UIEdgeInsets(top: 50, left: 50, bottom: 50, right: 50), animated: false)
-                
-                self.distanceLabel.text = String(round(route.distance * 10 * 0.000621371) / 10) + " mi"
-                self.expectedTravelLabel.text = String(Int(round(route.expectedTravelTime / 60)) + 1) + " min drive"
-            }
-        }
-    }
-    func startSkeleton(){
-        [distanceLabel, addressLabel, expectedTravelLabel, phoneLabel, callLabel, mapView, carImage, phoneImage ].forEach {
-                $0?.isSkeletonable = true
-                $0?.showAnimatedGradientSkeleton()
-        }
-    }
-    func stopSkeleton(){
-        
-        [distanceLabel, addressLabel, expectedTravelLabel, phoneLabel, callLabel,  mapView, carImage, phoneImage ].forEach {
-        $0?.hideSkeleton()
-        }
-    }
-    
-    //customize directions overlay (ie blue line that shows direction)
-    func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
-        let renderer = MKPolylineRenderer(polyline: overlay as! MKPolyline)
-        renderer.strokeColor = #colorLiteral(red: 0.1554663881, green: 0.6363340603, blue: 0.9606393373, alpha: 1)
-        renderer.lineWidth = 4.0
-        return renderer
-    }
-    
-    func addPin(title: String, latitude: Double, longitude: Double) {
-        let annotation = MKPointAnnotation()
-        let locationCoordinate = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
-        annotation.coordinate = locationCoordinate
-        annotation.title = title
-        mapView.addAnnotation(annotation)
     }
     
     //Fills all the labels after a segue is completed to this VC
@@ -304,9 +237,87 @@ class DetailsViewController: UIViewController, UIScrollViewDelegate, MKMapViewDe
             phoneLabel.text = String(phoneNumber)
             phoneLabel.font = UIFont.appLightFontWith(size: 12)
         }
-        
     }
     
+    // --------------------Tap Gestures-------------------------------------------------------------------
+    //allows views inside scroll view to respond to both scrolling and tap gestures
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        return true
+    }
+    
+    private func addTapGestures(){
+        
+        let minPressDuration = 0.05
+        
+        //add action to call button
+        let tapCallButton = UILongPressGestureRecognizer(target: self, action: #selector(call))
+        let tapMapButton = UILongPressGestureRecognizer(target: self, action: #selector(getDirections))
+        let tapMessages = UILongPressGestureRecognizer(target: self, action: #selector(message))
+        let tapCopyLink = UILongPressGestureRecognizer(target: self, action: #selector(copyLink))
+        
+        [(tapCallButton,callView), (tapMapButton,directionView), (tapMessages,messagesView),(tapCopyLink,copyLinkView)].forEach { (recognizer, view) in
+            recognizer.minimumPressDuration = minPressDuration
+            recognizer.delegate = self
+            recognizer.cancelsTouchesInView = false
+            view?.addGestureRecognizer(recognizer)
+        }
+    }
+
+    //Requests directions and adds its to mapview
+    func displayRoutes(source: CLLocationCoordinate2D, destination: CLLocationCoordinate2D){
+        
+        let request = MKDirections.Request()
+        request.source = MKMapItem(placemark: MKPlacemark(coordinate: source))
+        request.destination = MKMapItem(placemark: MKPlacemark(coordinate: destination))
+        request.transportType = .automobile
+        
+        let directions = MKDirections(request: request)
+        
+        directions.calculate { ( response, error) in
+            guard let unwrappedResponse = response else {return}
+            
+            //MUST STOP SKELETON BEFORE FILLING LABELS/IMAGES
+            self.stopSkeleton()
+            
+            for route in unwrappedResponse.routes {
+                self.mapView.addOverlay(route.polyline)
+                self.mapView.setVisibleMapRect(route.polyline.boundingMapRect, edgePadding: UIEdgeInsets(top: 50, left: 50, bottom: 50, right: 50), animated: false)
+                
+                self.distanceLabel.text = String(round(route.distance * 10 * 0.000621371) / 10) + " mi"
+                self.expectedTravelLabel.text = String(Int(round(route.expectedTravelTime / 60)) + 1) + " min drive"
+            }
+        }
+    }
+    
+    // --------------------Map View Functions-------------------------------------------------------------------
+    private func initMapView() {
+        mapView.showsUserLocation = true
+        
+        let currentLocation: CLLocationCoordinate2D = (locationManager?.location!.coordinate)!
+        self.destination = CLLocationCoordinate2D(latitude: (restuarant?.coordinates["latitude"])!, longitude: (restuarant?.coordinates["longitude"])!)
+        
+        addPin(title: "", latitude: self.destination!.latitude, longitude: self.destination!.longitude)
+        
+        displayRoutes(source: currentLocation, destination: self.destination!)
+        
+    }
+    //customize directions overlay (ie blue line that shows direction)
+    func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
+        let renderer = MKPolylineRenderer(polyline: overlay as! MKPolyline)
+        renderer.strokeColor = #colorLiteral(red: 0.1554663881, green: 0.6363340603, blue: 0.9606393373, alpha: 1)
+        renderer.lineWidth = 4.0
+        return renderer
+    }
+    
+    func addPin(title: String, latitude: Double, longitude: Double) {
+        let annotation = MKPointAnnotation()
+        let locationCoordinate = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+        annotation.coordinate = locationCoordinate
+        annotation.title = title
+        mapView.addAnnotation(annotation)
+    }
+    
+    // --------------------Tap Gesture functions and its helper functions-------------------------------------------------------------------
     //uses the restaurant's phone number to prompt a call
     @objc func call(gesture: UITapGestureRecognizer){
         
@@ -339,8 +350,6 @@ class DetailsViewController: UIViewController, UIScrollViewDelegate, MKMapViewDe
                 callNumber(phoneNumber: formattedNumber)
             }
         }
-        
-        
     }
     //prompts a call to the restaurant
     private func callNumber(phoneNumber:String) {
@@ -357,7 +366,7 @@ class DetailsViewController: UIViewController, UIScrollViewDelegate, MKMapViewDe
             }
         }
     }
-    
+    //modally triggers a immessage view with the restaurant link as the body
     @objc func message(gesture: UITapGestureRecognizer){
         
         if gesture.state == .cancelled || gesture.state == .failed || scrollView.isDragging{
@@ -393,21 +402,8 @@ class DetailsViewController: UIViewController, UIScrollViewDelegate, MKMapViewDe
             
         }
     }
-    private func addBottomBorder(view: UIView, width: CGFloat, thickness: CGFloat, margin: CGFloat, bgColor: CGColor) {
-        directionViewBottomBorder = CALayer()
-        directionViewBottomBorder.frame = CGRect(x: margin, y: view.frame.size.height - thickness, width: width - 2*margin, height: thickness)
-        directionViewBottomBorder.backgroundColor = bgColor
-        
-        view.layer.addSublayer(directionViewBottomBorder)
-    }
-    private func addRightBorder(view: UIView, thickness: CGFloat, margin: CGFloat, bgColor: CGColor) {
-        let rightBorder = CALayer()
-        rightBorder.frame = CGRect(x: view.frame.size.width - thickness, y: margin, width: thickness, height: view.frame.size.height - 2*margin)
-        rightBorder.backgroundColor = bgColor
-        
-        view.layer.addSublayer(rightBorder)
-    }
     
+    //modally triggers transition to Maps app with preset destination travelled to by car
     @objc func getDirections(gesture : UITapGestureRecognizer){
         
         if gesture.state == .cancelled || gesture.state == .failed || scrollView.isDragging{
@@ -442,7 +438,7 @@ class DetailsViewController: UIViewController, UIScrollViewDelegate, MKMapViewDe
         }
     }
     
-    
+    //Copies restaurant link to device clipboard and shows notification on the top
     @objc func copyLink(gesture: UITapGestureRecognizer){
         
         if gesture.state == .cancelled || gesture.state == .failed || scrollView.isDragging{
@@ -472,7 +468,8 @@ class DetailsViewController: UIViewController, UIScrollViewDelegate, MKMapViewDe
             let pasteboard = UIPasteboard.general
             pasteboard.string = restuarant?.url?.absoluteString
             
-            //create and animate a label that alerts that the link was copied
+            //create and animate a label that notifies that the link was copied
+            //comes from the top, waits for 0.3 seconds, then moves back up out of sight
             let margin = 40
             let offset = 70
             var promptLabel : UILabel?
@@ -500,14 +497,12 @@ class DetailsViewController: UIViewController, UIScrollViewDelegate, MKMapViewDe
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
                         UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseIn, animations: {
                             promptLabel?.transform = CGAffineTransform(translationX: 0, y: CGFloat(-offset))
-                        }, completion: nil)
+                        }, completion: {(movedOutOfSight) in
+                            promptLabel?.removeFromSuperview()
+                        })
                     }
-                    
                 }
             }
-            
-            
-            
         }
     }
     func messageComposeViewController(_ controller: MFMessageComposeViewController, didFinishWith result: MessageComposeResult) {
@@ -528,7 +523,7 @@ class DetailsViewController: UIViewController, UIScrollViewDelegate, MKMapViewDe
         controller.dismiss(animated: true, completion: nil)
     }
     
-    //handles share button
+    //handles share button placed on navigation bar
     @IBAction func shareWithOptions(_ sender: Any){
         
         if let url = restuarant?.url {
@@ -537,33 +532,36 @@ class DetailsViewController: UIViewController, UIScrollViewDelegate, MKMapViewDe
             present(shareVC, animated: true, completion: nil)
         }
     }
-    private func addTapGestures(){
-        
-        let minPressDuration = 0.2
-        //add action to call button
-        let tapCallButton = UILongPressGestureRecognizer(target: self, action: #selector(call))
-        tapCallButton.minimumPressDuration = minPressDuration
-        tapCallButton.delegate = self
-        tapCallButton.cancelsTouchesInView = false
-        callView.addGestureRecognizer(tapCallButton)
-        
-        
-        let tapMapButton = UILongPressGestureRecognizer(target: self, action: #selector(getDirections))
-        tapMapButton.minimumPressDuration = minPressDuration
-        tapMapButton.delegate = self
-        tapMapButton.cancelsTouchesInView = false
-        directionView.addGestureRecognizer(tapMapButton)
-        
-        let tapMessages = UILongPressGestureRecognizer(target: self, action: #selector(message))
-        tapMessages.minimumPressDuration = minPressDuration
-        tapMessages.delegate = self
-        tapMessages.cancelsTouchesInView = false
-        messagesView.addGestureRecognizer(tapMessages)
-        
-        let tapCopyLink = UILongPressGestureRecognizer(target: self, action: #selector(copyLink))
-        tapCopyLink.minimumPressDuration = minPressDuration
-        tapCopyLink.cancelsTouchesInView = false
-        copyLinkView.addGestureRecognizer(tapCopyLink)
+    
+    // --------------------SkeletonView Helper Functions-------------------------------------------------------------------
+    func startSkeleton(){
+        [distanceLabel, addressLabel, expectedTravelLabel, phoneLabel, callLabel, mapView, carImage, phoneImage ].forEach {
+                $0?.isSkeletonable = true
+                $0?.showAnimatedGradientSkeleton()
+        }
     }
+    func stopSkeleton(){
+        
+        [distanceLabel, addressLabel, expectedTravelLabel, phoneLabel, callLabel,  mapView, carImage, phoneImage ].forEach {
+        $0?.hideSkeleton()
+        }
+    }
+    
+    // --------------------UIView Helper Functions-------------------------------------------------------------------
+    private func addBottomBorder(view: UIView, width: CGFloat, thickness: CGFloat, margin: CGFloat, bgColor: CGColor) {
+        directionViewBottomBorder = CALayer()
+        directionViewBottomBorder.frame = CGRect(x: margin, y: view.frame.size.height - thickness, width: width - 2*margin, height: thickness)
+        directionViewBottomBorder.backgroundColor = bgColor
+        
+        view.layer.addSublayer(directionViewBottomBorder)
+    }
+    private func addRightBorder(view: UIView, thickness: CGFloat, margin: CGFloat, bgColor: CGColor) {
+        let rightBorder = CALayer()
+        rightBorder.frame = CGRect(x: view.frame.size.width - thickness, y: margin, width: thickness, height: view.frame.size.height - 2*margin)
+        rightBorder.backgroundColor = bgColor
+        
+        view.layer.addSublayer(rightBorder)
+    }
+    
 
 }
