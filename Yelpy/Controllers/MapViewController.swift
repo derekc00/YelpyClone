@@ -32,14 +32,20 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     // --------------------Map View Functions-------------------------------------------------------------------
     private func initMapView() {
         
-        
-        
-//        self.destination = CLLocationCoordinate2D(latitude: (restuarant?.coordinates["latitude"])!, longitude: (restuarant?.coordinates["longitude"])!)
-//
-//        addPin(title: "", latitude: self.destination!.latitude, longitude: self.destination!.longitude)
-//
-//        displayRoutes(source: currentLocation, destination: self.destination!)
-        
+        Restaurants.sharedInstance.array.forEach { (restaurant) in
+            let name = restaurant.name
+            guard let lat: Double = restaurant.coordinates["latitude"] else{
+                print("unable to retrieve lat in shared restaurant array in mapVC")
+                return
+            }
+            guard let long: Double = restaurant.coordinates["longitude"] else {
+                print("unable to retrieve long in shared restaurant array in mapVC")
+                return
+            }
+            
+            addPin(title: name, latitude: lat, longitude: long)
+        }
+
     }
     
     //once the map is loaded, the user location will be available through the mapView instance
@@ -54,6 +60,23 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         renderer.strokeColor = #colorLiteral(red: 0.1554663881, green: 0.6363340603, blue: 0.9606393373, alpha: 1)
         renderer.lineWidth = 4.0
         return renderer
+    }
+    func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
+        let reuseIdentifier = "annotationView"
+        var view = mapView.dequeueReusableAnnotationView(withIdentifier: reuseIdentifier)
+        if #available(iOS 11.0, *) {
+            if view == nil {
+                view = MKMarkerAnnotationView(annotation: annotation, reuseIdentifier: reuseIdentifier)
+            }
+            view?.displayPriority = .required
+        } else {
+            if view == nil {
+                view = MKPinAnnotationView(annotation: annotation, reuseIdentifier: reuseIdentifier)
+            }
+        }
+        view?.annotation = annotation
+        view?.canShowCallout = true
+        return view
     }
     
     func addPin(title: String, latitude: Double, longitude: Double) {
