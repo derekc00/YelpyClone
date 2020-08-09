@@ -36,6 +36,7 @@ class RestaurantsViewController: UIViewController, UITableViewDelegate, UITableV
         tableView.rowHeight = UITableView.automaticDimension
         tableView.estimatedRowHeight = 330
         
+
         searchBar.backgroundImage = UIImage()
         
         locationManager.delegate = self
@@ -55,6 +56,8 @@ class RestaurantsViewController: UIViewController, UITableViewDelegate, UITableV
         self.navigationController?.navigationBar.isHidden = true
         self.navigationController?.navigationBar.barStyle = UIBarStyle.default
         
+
+        self.tableView.reloadData()
     }
     
     //Get data from API helper and retrieve restaurants
