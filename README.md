@@ -12,10 +12,13 @@ Completed. Currently migrating concept to SwiftUI framework.
 |:------------------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------:|
 |                                      **Home Screen**                                       |                                    **Detail Screen (1)**                                    |                                    **Detail Screen (2)**                                    |                                          **Map**                                           |
 
-| [![ezgif-com-video-to-gif-8.gif](https://i.postimg.cc/ZYrdNd2k/ezgif-com-video-to-gif-8.gif)](https://postimg.cc/4nxykmXw) | [![ezgif-com-video-to-gif-9.gif](https://i.postimg.cc/VLZL0sfQ/ezgif-com-video-to-gif-9.gif)](https://postimg.cc/0bmqLsKc) | [![ezgif-com-video-to-gif-11.gif](https://i.postimg.cc/W4LV0hxK/ezgif-com-video-to-gif-11.gif)](https://postimg.cc/NK4Zcfs7) |
-|:------------------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------:|
-|                                      **Home Screen**                                       |                                    **Detail Screen**                                    |                                                                             **Map**                                           |
 
+
+
+
+| [![ezgif-com-video-to-gif-8.gif](https://i.postimg.cc/ZYrdNd2k/ezgif-com-video-to-gif-8.gif)](https://postimg.cc/4nxykmXw) | [![ezgif-com-video-to-gif-9.gif](https://i.postimg.cc/VLZL0sfQ/ezgif-com-video-to-gif-9.gif)](https://postimg.cc/0bmqLsKc) | [![ezgif-com-video-to-gif-11.gif](https://i.postimg.cc/W4LV0hxK/ezgif-com-video-to-gif-11.gif)](https://postimg.cc/NK4Zcfs7) |
+|:--------------------------------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------------------------------------:|:----------------------------------------------------------------------------------------------------------------------------:|
+|                                                      ** Home Screen**                                                      |                                                     ** Detail Screen**                                                     |                                                        **Map Screen**                                                        |
 
 ### Installation and Setup
 1. `download zip file`
