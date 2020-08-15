@@ -16,7 +16,7 @@ Completed. Currently migrating concept to SwiftUI framework.
 
 
 
-| [![ezgif-com-video-to-gif-8.gif](https://i.postimg.cc/ZYrdNd2k/ezgif-com-video-to-gif-8.gif)](https://postimg.cc/4nxykmXw) | [![ezgif-com-video-to-gif-9.gif](https://i.postimg.cc/VLZL0sfQ/ezgif-com-video-to-gif-9.gif)](https://postimg.cc/0bmqLsKc) | [![ezgif-com-video-to-gif-11.gif](https://i.postimg.cc/W4LV0hxK/ezgif-com-video-to-gif-11.gif)](https://postimg.cc/NK4Zcfs7) |
+| [![ezgif-com-video-to-gif-8.gif](https://i.postimg.cc/ZYrdNd2k/ezgif-com-video-to-gif-8.gif)](https://postimg.cc/4nxykmXw) | [![ezgif-com-video-to-gif-9.gif](https://i.postimg.cc/VLZL0sfQ/ezgif-com-video-to-gif-9.gif)](https://postimg.cc/0bmqLsKc) | [![ezgif-com-video-to-gif-12.gif](https://i.postimg.cc/8c2FW1Gb/ezgif-com-video-to-gif-12.gif)](https://postimg.cc/9wBFHHr4) |
 |:--------------------------------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------------------------------------:|:----------------------------------------------------------------------------------------------------------------------------:|
 |                                                      ** Home Screen**                                                      |                                                     ** Detail Screen**                                                     |                                                        **Map Screen**                                                        |
 
