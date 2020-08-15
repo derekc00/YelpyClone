@@ -24,8 +24,6 @@ class DetailsViewController: UIViewController, UIScrollViewDelegate, MKMapViewDe
     @IBOutlet weak var nameLabel: UILabel!
     @IBOutlet weak var reviewImage: UIImageView!
     @IBOutlet weak var reviewCountLabel: UILabel!
-    @IBOutlet weak var priceLabel: UILabel!
-    @IBOutlet weak var categoryLabel: UILabel!
     @IBOutlet weak var isClosedLabel: UILabel!
     @IBOutlet weak var distanceLabel: UILabel!
     @IBOutlet weak var addressLabel: UILabel!
