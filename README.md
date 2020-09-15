@@ -1,5 +1,5 @@
 # YelpyClone
-[ezgif-com-video-to-gif-14.gif](https://postimg.cc/jCSP8fQK)
+[![ezgif-com-video-to-gif-14.gif](https://postimg.cc/jCSP8fQK)]
 An iOS clone of the Yelp app using the Yelp Fusion API.
 
 ### Project Status
